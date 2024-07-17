@@ -1,4 +1,5 @@
-﻿using Quantum;
+﻿using ExitGames.Client.Photon.StructWrapping;
+using Quantum;
 using UnityEngine;
 
 [RequireComponent(typeof(EntityView))]
@@ -18,5 +19,13 @@ public class PlayerView : MonoBehaviour
         {
             Camera.main!.GetComponent<CameraFollow>().SetTarget(transform);
         }
+        GameEvents.OnEntityViewCreated?.Invoke(_view);
     }
+
+    private void OnDestroy()
+    {
+        GameEvents.OnEntityViewDestroyed?.Invoke();
+    }
+
+
 }

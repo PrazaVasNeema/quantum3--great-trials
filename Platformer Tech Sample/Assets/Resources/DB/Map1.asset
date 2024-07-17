@@ -85,7 +85,8 @@ MonoBehaviour:
       MutableMode: 0
     MapEntities: []
   Prototypes:
-  - HealthComponent: []
+  - FallDamageComponent: []
+    HealthComponent: []
     Platform:
     - Config:
         Id:
@@ -174,7 +175,8 @@ MonoBehaviour:
     View: []
     PhysicsJoints2D: []
     PhysicsJoints3D: []
-  - HealthComponent: []
+  - FallDamageComponent: []
+    HealthComponent: []
     Platform:
     - Config:
         Id:
@@ -263,7 +265,8 @@ MonoBehaviour:
     View: []
     PhysicsJoints2D: []
     PhysicsJoints3D: []
-  - HealthComponent: []
+  - FallDamageComponent: []
+    HealthComponent: []
     Platform:
     - Config:
         Id:
@@ -352,7 +355,8 @@ MonoBehaviour:
     View: []
     PhysicsJoints2D: []
     PhysicsJoints3D: []
-  - HealthComponent: []
+  - FallDamageComponent: []
+    HealthComponent: []
     Platform:
     - Config:
         Id:
@@ -441,7 +445,8 @@ MonoBehaviour:
     View: []
     PhysicsJoints2D: []
     PhysicsJoints3D: []
-  - HealthComponent: []
+  - FallDamageComponent: []
+    HealthComponent: []
     Platform:
     - Config:
         Id:
