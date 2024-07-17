@@ -781,20 +781,24 @@ namespace Quantum {
   }
   [StructLayout(LayoutKind.Explicit)]
   public unsafe partial struct HealthComponent : Quantum.IComponent {
-    public const Int32 SIZE = 8;
+    public const Int32 SIZE = 16;
     public const Int32 ALIGNMENT = 8;
     [FieldOffset(0)]
     public FP currentHealth;
+    [FieldOffset(8)]
+    public FP maxHealth;
     public override Int32 GetHashCode() {
       unchecked { 
         var hash = 89;
         hash = hash * 31 + currentHealth.GetHashCode();
+        hash = hash * 31 + maxHealth.GetHashCode();
         return hash;
       }
     }
     public static void Serialize(void* ptr, FrameSerializer serializer) {
         var p = (HealthComponent*)ptr;
         FP.Serialize(&p->currentHealth, serializer);
+        FP.Serialize(&p->maxHealth, serializer);
     }
   }
   [StructLayout(LayoutKind.Explicit)]
@@ -1258,6 +1262,7 @@ namespace Quantum.Prototypes {
   [Prototype(typeof(HealthComponent))]
   public sealed unsafe partial class HealthComponent_Prototype : ComponentPrototype<HealthComponent> {
     public FP currentHealth;
+    public FP maxHealth;
     partial void MaterializeUser(Frame frame, ref HealthComponent result, in PrototypeMaterializationContext context);
     public override Boolean AddToEntity(FrameBase f, EntityRef entity, in PrototypeMaterializationContext context) {
       HealthComponent component = default;
@@ -1266,6 +1271,7 @@ namespace Quantum.Prototypes {
     }
     public void Materialize(Frame frame, ref HealthComponent result, in PrototypeMaterializationContext context) {
       result.currentHealth = this.currentHealth;
+      result.maxHealth = this.maxHealth;
       MaterializeUser(frame, ref result, in context);
     }
     public override void Dispatch(ComponentPrototypeVisitorBase visitor) {

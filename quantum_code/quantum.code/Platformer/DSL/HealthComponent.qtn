@@ -1,4 +1,5 @@
 component HealthComponent
 {
 	FP currentHealth;
+	FP maxHealth;
 }

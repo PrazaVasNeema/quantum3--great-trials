@@ -13,7 +13,7 @@ public class InGameUIHandler : MonoBehaviour
     private Image m_healthBarImage;
 
     [SerializeField]
-    private float m_maxHealth = 100;
+    private float m_maxHealth = 0;
 
     private EntityView m_entityView = null;
 
@@ -30,6 +30,13 @@ public class InGameUIHandler : MonoBehaviour
     private void OnEntityViewCreated(EntityView entityView)
     {
         m_entityView = entityView;
+        if (Utils.TryGetQuantumFrame(out Frame frame))
+        {
+            var healthComponent = frame.Get<HealthComponent>(m_entityView.EntityRef);
+            m_maxHealth = (int)healthComponent.maxHealth;
+            m_healthValueText.text = ((int)healthComponent.currentHealth).ToString() + "/" + m_maxHealth;
+            m_healthBarImage.fillAmount = ((float)healthComponent.currentHealth / m_maxHealth);
+        }
     }
 
     // Start is called before the first frame update
@@ -47,7 +54,7 @@ public class InGameUIHandler : MonoBehaviour
             {
                 var healthComponent = frame.Get<HealthComponent>(m_entityView.EntityRef);
 
-                m_healthValueText.text = ((int)healthComponent.currentHealth).ToString();
+                m_healthValueText.text = ((int)healthComponent.currentHealth).ToString() + "/" + m_maxHealth;
                 m_healthBarImage.fillAmount = ((float)healthComponent.currentHealth / m_maxHealth);
             }
         }

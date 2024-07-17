@@ -22,6 +22,7 @@ namespace Quantum.Platformer
             var healthComponent = new HealthComponent()
             {
                 currentHealth = 100,
+                maxHealth = 100,
             };
 
             var fallDamageComponent = new FallDamageComponent()
