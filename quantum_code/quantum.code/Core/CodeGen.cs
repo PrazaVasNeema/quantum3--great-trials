@@ -26,9 +26,14 @@ namespace Quantum {
   using MethodImplAttribute = System.Runtime.CompilerServices.MethodImplAttribute;
   using MethodImplOptions = System.Runtime.CompilerServices.MethodImplOptions;
   
+  public enum GameState : int {
+    Gameplay,
+    DeathScreen,
+  }
   [System.FlagsAttribute()]
   public enum InputButtons : int {
     Jump = 1 << 0,
+    RestartGame = 1 << 1,
   }
   public static unsafe partial class InputButtons_ext {
     public static Boolean IsFlagSet(this InputButtons self, InputButtons flag) {
@@ -648,18 +653,21 @@ namespace Quantum {
   }
   [StructLayout(LayoutKind.Explicit)]
   public unsafe partial struct Input {
-    public const Int32 SIZE = 32;
+    public const Int32 SIZE = 40;
     public const Int32 ALIGNMENT = 8;
-    [FieldOffset(16)]
+    [FieldOffset(24)]
     public FPVector2 Direction;
     [FieldOffset(0)]
     public Button Jump;
+    [FieldOffset(12)]
+    public Button RestartGame;
     public const int MAX_COUNT = 6;
     public override Int32 GetHashCode() {
       unchecked { 
         var hash = 73;
         hash = hash * 31 + Direction.GetHashCode();
         hash = hash * 31 + Jump.GetHashCode();
+        hash = hash * 31 + RestartGame.GetHashCode();
         return hash;
       }
     }
@@ -674,34 +682,37 @@ namespace Quantum {
     public Boolean IsDown(InputButtons button) {
       switch (button) {
         case InputButtons.Jump: return Jump.IsDown;
+        case InputButtons.RestartGame: return RestartGame.IsDown;
       }
       return false;
     }
     public Boolean WasPressed(InputButtons button) {
       switch (button) {
         case InputButtons.Jump: return Jump.WasPressed;
+        case InputButtons.RestartGame: return RestartGame.WasPressed;
       }
       return false;
     }
     public static void Serialize(void* ptr, FrameSerializer serializer) {
         var p = (Input*)ptr;
         Button.Serialize(&p->Jump, serializer);
+        Button.Serialize(&p->RestartGame, serializer);
         FPVector2.Serialize(&p->Direction, serializer);
     }
   }
   [StructLayout(LayoutKind.Explicit)]
   public unsafe partial struct _globals_ {
-    public const Int32 SIZE = 736;
+    public const Int32 SIZE = 784;
     public const Int32 ALIGNMENT = 8;
     [FieldOffset(16)]
     public FP DeltaTime;
-    [FieldOffset(272)]
+    [FieldOffset(80)]
     public FrameMetaData FrameMetaData;
     [FieldOffset(0)]
     public AssetRefMap Map;
     [FieldOffset(24)]
     public NavMeshRegionMask NavMeshRegions;
-    [FieldOffset(440)]
+    [FieldOffset(488)]
     public PhysicsSceneSettings PhysicsSettings;
     [FieldOffset(32)]
     public PhysicsEngineState PhysicsState2D;
@@ -711,14 +722,14 @@ namespace Quantum {
     public BitSet6 PlayerLastConnectionState;
     [FieldOffset(64)]
     public RNGSession RngSession;
-    [FieldOffset(312)]
+    [FieldOffset(360)]
     public BitSet1024 Systems;
-    [FieldOffset(80)]
+    [FieldOffset(120)]
     [FramePrinter.FixedArrayAttribute(typeof(Input), 6)]
-    private fixed Byte _input_[192];
+    private fixed Byte _input_[240];
     public FixedArray<Input> input {
       get {
-        fixed (byte* p = _input_) { return new FixedArray<Input>(p, 32, 6); }
+        fixed (byte* p = _input_) { return new FixedArray<Input>(p, 40, 6); }
       }
     }
     public override Int32 GetHashCode() {
@@ -747,8 +758,8 @@ namespace Quantum {
         PhysicsEngineState.Serialize(&p->PhysicsState2D, serializer);
         PhysicsEngineState.Serialize(&p->PhysicsState3D, serializer);
         RNGSession.Serialize(&p->RngSession, serializer);
-        FixedArray.Serialize(p->input, serializer, StaticDelegates.SerializeInput);
         FrameMetaData.Serialize(&p->FrameMetaData, serializer);
+        FixedArray.Serialize(p->input, serializer, StaticDelegates.SerializeInput);
         Quantum.BitSet1024.Serialize(&p->Systems, serializer);
         PhysicsSceneSettings.Serialize(&p->PhysicsSettings, serializer);
     }
@@ -780,6 +791,24 @@ namespace Quantum {
     }
   }
   [StructLayout(LayoutKind.Explicit)]
+  public unsafe partial struct GameSession : Quantum.IComponentSingleton {
+    public const Int32 SIZE = 4;
+    public const Int32 ALIGNMENT = 4;
+    [FieldOffset(0)]
+    public GameState State;
+    public override Int32 GetHashCode() {
+      unchecked { 
+        var hash = 89;
+        hash = hash * 31 + (Int32)State;
+        return hash;
+      }
+    }
+    public static void Serialize(void* ptr, FrameSerializer serializer) {
+        var p = (GameSession*)ptr;
+        serializer.Stream.Serialize((Int32*)&p->State);
+    }
+  }
+  [StructLayout(LayoutKind.Explicit)]
   public unsafe partial struct HealthComponent : Quantum.IComponent {
     public const Int32 SIZE = 16;
     public const Int32 ALIGNMENT = 8;
@@ -789,7 +818,7 @@ namespace Quantum {
     public FP maxHealth;
     public override Int32 GetHashCode() {
       unchecked { 
-        var hash = 89;
+        var hash = 97;
         hash = hash * 31 + currentHealth.GetHashCode();
         hash = hash * 31 + maxHealth.GetHashCode();
         return hash;
@@ -851,7 +880,7 @@ namespace Quantum {
     public FP ZMovementAccumulatedTime;
     public override Int32 GetHashCode() {
       unchecked { 
-        var hash = 97;
+        var hash = 101;
         hash = hash * 31 + Config.GetHashCode();
         hash = hash * 31 + LastMovementCurveEvaluation.GetHashCode();
         hash = hash * 31 + LastRotationCurveEvaluation.GetHashCode();
@@ -897,7 +926,7 @@ namespace Quantum {
     public PlayerRef Player;
     public override Int32 GetHashCode() {
       unchecked { 
-        var hash = 101;
+        var hash = 103;
         hash = hash * 31 + Player.GetHashCode();
         return hash;
       }
@@ -939,7 +968,7 @@ namespace Quantum {
     public FPQuaternion PlatformDeltaRotation;
     public override Int32 GetHashCode() {
       unchecked { 
-        var hash = 103;
+        var hash = 107;
         hash = hash * 31 + CollidingWithPlatform.GetHashCode();
         hash = hash * 31 + Config.GetHashCode();
         hash = hash * 31 + Entity.GetHashCode();
@@ -978,6 +1007,7 @@ namespace Quantum {
     static partial void InitStaticGen() {
       ComponentTypeId.Setup(() => {
         ComponentTypeId.Add<Quantum.FallDamageComponent>(Quantum.FallDamageComponent.Serialize, null, null, ComponentFlags.None);
+        ComponentTypeId.Add<Quantum.GameSession>(Quantum.GameSession.Serialize, null, null, ComponentFlags.Singleton);
         ComponentTypeId.Add<Quantum.HealthComponent>(Quantum.HealthComponent.Serialize, null, null, ComponentFlags.None);
         ComponentTypeId.Add<Quantum.Platform>(Quantum.Platform.Serialize, null, null, ComponentFlags.None);
         ComponentTypeId.Add<Quantum.PlayerLink>(Quantum.PlayerLink.Serialize, null, null, ComponentFlags.None);
@@ -994,6 +1024,8 @@ namespace Quantum {
       BuildSignalsArrayOnComponentRemoved<CharacterController3D>();
       BuildSignalsArrayOnComponentAdded<Quantum.FallDamageComponent>();
       BuildSignalsArrayOnComponentRemoved<Quantum.FallDamageComponent>();
+      BuildSignalsArrayOnComponentAdded<Quantum.GameSession>();
+      BuildSignalsArrayOnComponentRemoved<Quantum.GameSession>();
       BuildSignalsArrayOnComponentAdded<Quantum.HealthComponent>();
       BuildSignalsArrayOnComponentRemoved<Quantum.HealthComponent>();
       BuildSignalsArrayOnComponentAdded<MapEntityLink>();
@@ -1034,6 +1066,7 @@ namespace Quantum {
       var i = _globals->input.GetPointer(player);
       i->Jump = i->Jump.Update(this.Number, input.Jump);
       i->Direction = input.Direction;
+      i->RestartGame = i->RestartGame.Update(this.Number, input.RestartGame);
     }
     public Input* GetPlayerInput(Int32 player) {
       if ((uint)player >= (uint)_globals->input.Length) { throw new System.ArgumentOutOfRangeException("player"); }
@@ -1079,6 +1112,9 @@ namespace Quantum {
   }
   public unsafe partial class ComponentPrototypeVisitor : Prototypes.ComponentPrototypeVisitorBase {
     public virtual void Visit(Prototypes.FallDamageComponent_Prototype prototype) {
+      VisitFallback(prototype);
+    }
+    public virtual void Visit(Prototypes.GameSession_Prototype prototype) {
       VisitFallback(prototype);
     }
     public virtual void Visit(Prototypes.HealthComponent_Prototype prototype) {
@@ -1144,6 +1180,8 @@ namespace Quantum {
       Register(typeof(FPVector3), FPVector3.SIZE);
       Register(typeof(Quantum.FallDamageComponent), Quantum.FallDamageComponent.SIZE);
       Register(typeof(FrameMetaData), FrameMetaData.SIZE);
+      Register(typeof(Quantum.GameSession), Quantum.GameSession.SIZE);
+      Register(typeof(Quantum.GameState), 4);
       Register(typeof(Quantum.HealthComponent), Quantum.HealthComponent.SIZE);
       Register(typeof(HingeJoint), HingeJoint.SIZE);
       Register(typeof(HingeJoint3D), HingeJoint3D.SIZE);
@@ -1195,6 +1233,7 @@ namespace Quantum {
     public static void EnsureNotStripped() {
       FramePrinter.EnsurePrimitiveNotStripped<Quantum.AssetRefPlatformConfig>();
       FramePrinter.EnsurePrimitiveNotStripped<Quantum.AssetRefPlatformControllerConfig>();
+      FramePrinter.EnsurePrimitiveNotStripped<Quantum.GameState>();
       FramePrinter.EnsurePrimitiveNotStripped<Quantum.InputButtons>();
       FramePrinter.EnsurePrimitiveNotStripped<Quantum.PlatformAxis>();
     }
@@ -1214,6 +1253,17 @@ namespace Quantum.Prototypes {
   using MethodImplAttribute = System.Runtime.CompilerServices.MethodImplAttribute;
   using MethodImplOptions = System.Runtime.CompilerServices.MethodImplOptions;
   
+  [System.SerializableAttribute()]
+  [Prototype(typeof(GameState))]
+  public unsafe partial struct GameState_Prototype {
+    public Int32 Value;
+    public static implicit operator GameState(GameState_Prototype value) {
+        return (GameState)value.Value;
+    }
+    public static implicit operator GameState_Prototype(GameState value) {
+        return new GameState_Prototype() { Value = (Int32)value };
+    }
+  }
   [System.SerializableAttribute()]
   [Prototype(typeof(InputButtons))]
   public unsafe partial struct InputButtons_Prototype {
@@ -1259,6 +1309,24 @@ namespace Quantum.Prototypes {
     }
   }
   [System.SerializableAttribute()]
+  [Prototype(typeof(GameSession))]
+  public sealed unsafe partial class GameSession_Prototype : ComponentPrototype<GameSession> {
+    public GameState_Prototype State;
+    partial void MaterializeUser(Frame frame, ref GameSession result, in PrototypeMaterializationContext context);
+    public override Boolean AddToEntity(FrameBase f, EntityRef entity, in PrototypeMaterializationContext context) {
+      GameSession component = default;
+      Materialize((Frame)f, ref component, in context);
+      return f.Set(entity, component) == SetResult.ComponentAdded;
+    }
+    public void Materialize(Frame frame, ref GameSession result, in PrototypeMaterializationContext context) {
+      result.State = this.State;
+      MaterializeUser(frame, ref result, in context);
+    }
+    public override void Dispatch(ComponentPrototypeVisitorBase visitor) {
+      ((ComponentPrototypeVisitor)visitor).Visit(this);
+    }
+  }
+  [System.SerializableAttribute()]
   [Prototype(typeof(HealthComponent))]
   public sealed unsafe partial class HealthComponent_Prototype : ComponentPrototype<HealthComponent> {
     public FP currentHealth;
@@ -1283,10 +1351,12 @@ namespace Quantum.Prototypes {
   public sealed unsafe partial class Input_Prototype : StructPrototype {
     public Button Jump;
     public FPVector2 Direction;
+    public Button RestartGame;
     partial void MaterializeUser(Frame frame, ref Input result, in PrototypeMaterializationContext context);
     public void Materialize(Frame frame, ref Input result, in PrototypeMaterializationContext context) {
       result.Direction = this.Direction;
       result.Jump = this.Jump;
+      result.RestartGame = this.RestartGame;
       MaterializeUser(frame, ref result, in context);
     }
   }
@@ -1360,6 +1430,8 @@ namespace Quantum.Prototypes {
     [ArrayLength(0, 1)]
     public List<Prototypes.FallDamageComponent_Prototype> FallDamageComponent;
     [ArrayLength(0, 1)]
+    public List<Prototypes.GameSession_Prototype> GameSession;
+    [ArrayLength(0, 1)]
     public List<Prototypes.HealthComponent_Prototype> HealthComponent;
     [ArrayLength(0, 1)]
     public List<Prototypes.Platform_Prototype> Platform;
@@ -1369,6 +1441,7 @@ namespace Quantum.Prototypes {
     public List<Prototypes.PlayerPlatformController_Prototype> PlayerPlatformController;
     partial void CollectGen(List<ComponentPrototype> target) {
       Collect(FallDamageComponent, target);
+      Collect(GameSession, target);
       Collect(HealthComponent, target);
       Collect(Platform, target);
       Collect(PlayerLink, target);
@@ -1377,6 +1450,9 @@ namespace Quantum.Prototypes {
     public unsafe partial class StoreVisitor {
       public override void Visit(Prototypes.FallDamageComponent_Prototype prototype) {
         Storage.Store(prototype, ref Storage.FallDamageComponent);
+      }
+      public override void Visit(Prototypes.GameSession_Prototype prototype) {
+        Storage.Store(prototype, ref Storage.GameSession);
       }
       public override void Visit(Prototypes.HealthComponent_Prototype prototype) {
         Storage.Store(prototype, ref Storage.HealthComponent);

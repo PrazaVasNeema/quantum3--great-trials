@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class LocalInput : MonoBehaviour
 {
+    private bool m_shouldSubmit = false;
+
     private void Start()
     {
         QuantumCallback.Subscribe(this, (CallbackPollInput callback) => PollInput(callback));
@@ -15,7 +17,7 @@ public class LocalInput : MonoBehaviour
 
         // Note: Use GetButton not GetButtonDown/Up Quantum calculates up/down itself.
         input.Jump = UnityEngine.Input.GetButton("Jump");
-        
+        input.RestartGame = UnityEngine.Input.GetButton("Submit");
         var x = UnityEngine.Input.GetAxis("Horizontal");
         var y = UnityEngine.Input.GetAxis("Vertical");
         
@@ -39,4 +41,6 @@ public class LocalInput : MonoBehaviour
         
         return dir;
     }
+
+
 }

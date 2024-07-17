@@ -86,6 +86,7 @@ MonoBehaviour:
     MapEntities: []
   Prototypes:
   - FallDamageComponent: []
+    GameSession: []
     HealthComponent: []
     Platform:
     - Config:
@@ -176,6 +177,7 @@ MonoBehaviour:
     PhysicsJoints2D: []
     PhysicsJoints3D: []
   - FallDamageComponent: []
+    GameSession: []
     HealthComponent: []
     Platform:
     - Config:
@@ -266,6 +268,7 @@ MonoBehaviour:
     PhysicsJoints2D: []
     PhysicsJoints3D: []
   - FallDamageComponent: []
+    GameSession: []
     HealthComponent: []
     Platform:
     - Config:
@@ -356,6 +359,7 @@ MonoBehaviour:
     PhysicsJoints2D: []
     PhysicsJoints3D: []
   - FallDamageComponent: []
+    GameSession: []
     HealthComponent: []
     Platform:
     - Config:
@@ -446,6 +450,7 @@ MonoBehaviour:
     PhysicsJoints2D: []
     PhysicsJoints3D: []
   - FallDamageComponent: []
+    GameSession: []
     HealthComponent: []
     Platform:
     - Config:
@@ -532,6 +537,32 @@ MonoBehaviour:
           RawValue: 0
         Z:
           RawValue: 0
+    View: []
+    PhysicsJoints2D: []
+    PhysicsJoints3D: []
+  - FallDamageComponent: []
+    GameSession:
+    - State:
+        Value: 0
+    HealthComponent: []
+    Platform: []
+    PlayerLink: []
+    PlayerPlatformController: []
+    CharacterController2D: []
+    CharacterController3D: []
+    NavMeshAvoidanceAgent: []
+    NavMeshAvoidanceObstacle: []
+    NavMeshPathfinder: []
+    NavMeshSteeringAgent: []
+    PhysicsBody2D: []
+    PhysicsBody3D: []
+    PhysicsCollider2D: []
+    PhysicsCollider3D: []
+    PhysicsCallbacks2D: []
+    PhysicsCallbacks3D: []
+    Transform2D: []
+    Transform2DVertical: []
+    Transform3D: []
     View: []
     PhysicsJoints2D: []
     PhysicsJoints3D: []

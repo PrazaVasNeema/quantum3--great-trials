@@ -17,6 +17,18 @@ namespace Quantum.Platformer
 
         public override void Update(Frame f, ref Filter filter)
         {
+            GameSession* gameSession = f.Unsafe.GetPointerSingleton<GameSession>();
+
+            if (gameSession == null)
+            {
+                return;
+            }
+
+            if (gameSession->State != GameState.Gameplay)
+            {
+                return;
+            }
+
             Input input = default;
 
             if (f.Unsafe.TryGetPointer(filter.Entity, out PlayerLink* playerLink))

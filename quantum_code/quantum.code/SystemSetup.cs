@@ -31,7 +31,10 @@ namespace Quantum
                 new PlayerSpawnSystem(),
                 new MovementSystem(),
                 new PlayerHeadSystem(),
+
+                // Mine systems
                 new FallDamageSystem(),
+                new GameSessionStateSystem(),
             };
         }
     }

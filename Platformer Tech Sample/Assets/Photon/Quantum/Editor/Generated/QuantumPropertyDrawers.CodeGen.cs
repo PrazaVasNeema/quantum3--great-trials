@@ -22,6 +22,7 @@ namespace Quantum.Editor {
     }
   }
 
+  [CustomPropertyDrawer(typeof(Quantum.Prototypes.GameState_Prototype))]
   [CustomPropertyDrawer(typeof(Quantum.Prototypes.InputButtons_Prototype))]
   [CustomPropertyDrawer(typeof(Quantum.Prototypes.PlatformAxis_Prototype))]
   partial class PrototypeDrawer {}

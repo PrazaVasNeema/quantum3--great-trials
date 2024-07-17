@@ -44,16 +44,34 @@ namespace Quantum.Platformer
                 filter.FallDamageComponent->IsFalling= true;
             }
 
-            if (filter.HealthComponent->currentHealth == 0)
+            Input input = default;
+
+            if (f.Unsafe.TryGetPointer(filter.Entity, out PlayerLink* playerLink))
             {
+                input = *f.GetPlayerInput(playerLink->Player);
+            }
+
+            GameSession* gameSession = f.Unsafe.GetPointerSingleton<GameSession>();
+
+            if (input.RestartGame.WasPressed && gameSession->State == GameState.DeathScreen)
+            {
+                gameSession->State = GameState.Gameplay;
                 ResetPlayer(ref filter);
             }
+
+            if (filter.HealthComponent->currentHealth == 0)
+            {
+                gameSession->State = GameState.DeathScreen;
+            }
+
+
 
         }
 
         private void ApplyFallDamage(ref Filter filter, FP fallDistance)
         {
             var finalDamage = FPMath.Abs(fallDistance - 1);
+            finalDamage = FPMath.Round(finalDamage);
             filter.HealthComponent->currentHealth = FPMath.Max(filter.HealthComponent->currentHealth - finalDamage, FP._0);
         }
 
