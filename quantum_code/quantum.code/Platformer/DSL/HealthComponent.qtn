@@ -1,0 +1,4 @@
+component HealthComponent
+{
+	short currentHealth;
+}

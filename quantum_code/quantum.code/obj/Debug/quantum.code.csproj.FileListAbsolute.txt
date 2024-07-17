@@ -1,0 +1,7 @@
+V:\Cargo\quantum-3d-platformer-2.1.8.1\Platformer Tech Sample\Assets\Photon\Quantum\Assemblies\quantum.code.dll
+V:\Cargo\quantum-3d-platformer-2.1.8.1\Platformer Tech Sample\Assets\Photon\Quantum\Assemblies\quantum.code.pdb
+V:\Cargo\quantum-3d-platformer-2.1.8.1\quantum_code\quantum.code\obj\Debug\quantum.code.csproj.AssemblyReference.cache
+V:\Cargo\quantum-3d-platformer-2.1.8.1\quantum_code\quantum.code\obj\Debug\quantum.code.csproj.CoreCompileInputs.cache
+V:\Cargo\quantum-3d-platformer-2.1.8.1\quantum_code\quantum.code\obj\Debug\quantum..687D3AA2.Up2Date
+V:\Cargo\quantum-3d-platformer-2.1.8.1\quantum_code\quantum.code\obj\Debug\quantum.code.dll
+V:\Cargo\quantum-3d-platformer-2.1.8.1\quantum_code\quantum.code\obj\Debug\quantum.code.pdb
