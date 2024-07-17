@@ -1,4 +1,6 @@
-﻿namespace Quantum.Platformer
+﻿using Photon.Deterministic;
+
+namespace Quantum.Platformer
 {
     unsafe class PlayerSpawnSystem : SystemSignalsOnly, ISignalOnPlayerDataSet
     {
@@ -21,9 +23,17 @@
             {
                 currentHealth = 100,
             };
-            
+
+            var fallDamageComponent = new FallDamageComponent()
+            {
+                StartingHeight = 10 + player,
+                IsFalling = false,
+                PreviousVerticalVelocity = FP._0,
+            };
+
             frame.Add(entity, playerLink);
             frame.Add(entity, healthComponent);
+            frame.Add(entity, fallDamageComponent);
 
             // Offset the instantiated object in the world, based in its ID.
             if (frame.Unsafe.TryGetPointer<Transform3D>(entity, out var transform))

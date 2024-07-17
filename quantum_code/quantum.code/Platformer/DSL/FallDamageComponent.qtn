@@ -1,0 +1,6 @@
+component FallDamageComponent
+{
+    FP StartingHeight;
+    bool IsFalling;
+    FP PreviousVerticalVelocity;
+}

@@ -1,4 +1,4 @@
 component HealthComponent
 {
-	short currentHealth;
+	FP currentHealth;
 }

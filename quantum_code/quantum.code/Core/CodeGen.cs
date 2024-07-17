@@ -754,23 +754,47 @@ namespace Quantum {
     }
   }
   [StructLayout(LayoutKind.Explicit)]
-  public unsafe partial struct HealthComponent : Quantum.IComponent {
-    public const Int32 SIZE = 4;
-    public const Int32 ALIGNMENT = 2;
-    [FieldOffset(2)]
-    private fixed Byte _alignment_padding_[2];
+  public unsafe partial struct FallDamageComponent : Quantum.IComponent {
+    public const Int32 SIZE = 24;
+    public const Int32 ALIGNMENT = 8;
     [FieldOffset(0)]
-    public Int16 currentHealth;
+    public QBoolean IsFalling;
+    [FieldOffset(8)]
+    public FP PreviousVerticalVelocity;
+    [FieldOffset(16)]
+    public FP StartingHeight;
     public override Int32 GetHashCode() {
       unchecked { 
         var hash = 83;
+        hash = hash * 31 + IsFalling.GetHashCode();
+        hash = hash * 31 + PreviousVerticalVelocity.GetHashCode();
+        hash = hash * 31 + StartingHeight.GetHashCode();
+        return hash;
+      }
+    }
+    public static void Serialize(void* ptr, FrameSerializer serializer) {
+        var p = (FallDamageComponent*)ptr;
+        QBoolean.Serialize(&p->IsFalling, serializer);
+        FP.Serialize(&p->PreviousVerticalVelocity, serializer);
+        FP.Serialize(&p->StartingHeight, serializer);
+    }
+  }
+  [StructLayout(LayoutKind.Explicit)]
+  public unsafe partial struct HealthComponent : Quantum.IComponent {
+    public const Int32 SIZE = 8;
+    public const Int32 ALIGNMENT = 8;
+    [FieldOffset(0)]
+    public FP currentHealth;
+    public override Int32 GetHashCode() {
+      unchecked { 
+        var hash = 89;
         hash = hash * 31 + currentHealth.GetHashCode();
         return hash;
       }
     }
     public static void Serialize(void* ptr, FrameSerializer serializer) {
         var p = (HealthComponent*)ptr;
-        serializer.Stream.Serialize(&p->currentHealth);
+        FP.Serialize(&p->currentHealth, serializer);
     }
   }
   [StructLayout(LayoutKind.Explicit)]
@@ -823,7 +847,7 @@ namespace Quantum {
     public FP ZMovementAccumulatedTime;
     public override Int32 GetHashCode() {
       unchecked { 
-        var hash = 89;
+        var hash = 97;
         hash = hash * 31 + Config.GetHashCode();
         hash = hash * 31 + LastMovementCurveEvaluation.GetHashCode();
         hash = hash * 31 + LastRotationCurveEvaluation.GetHashCode();
@@ -869,7 +893,7 @@ namespace Quantum {
     public PlayerRef Player;
     public override Int32 GetHashCode() {
       unchecked { 
-        var hash = 97;
+        var hash = 101;
         hash = hash * 31 + Player.GetHashCode();
         return hash;
       }
@@ -911,7 +935,7 @@ namespace Quantum {
     public FPQuaternion PlatformDeltaRotation;
     public override Int32 GetHashCode() {
       unchecked { 
-        var hash = 101;
+        var hash = 103;
         hash = hash * 31 + CollidingWithPlatform.GetHashCode();
         hash = hash * 31 + Config.GetHashCode();
         hash = hash * 31 + Entity.GetHashCode();
@@ -949,6 +973,7 @@ namespace Quantum {
     }
     static partial void InitStaticGen() {
       ComponentTypeId.Setup(() => {
+        ComponentTypeId.Add<Quantum.FallDamageComponent>(Quantum.FallDamageComponent.Serialize, null, null, ComponentFlags.None);
         ComponentTypeId.Add<Quantum.HealthComponent>(Quantum.HealthComponent.Serialize, null, null, ComponentFlags.None);
         ComponentTypeId.Add<Quantum.Platform>(Quantum.Platform.Serialize, null, null, ComponentFlags.None);
         ComponentTypeId.Add<Quantum.PlayerLink>(Quantum.PlayerLink.Serialize, null, null, ComponentFlags.None);
@@ -963,6 +988,8 @@ namespace Quantum {
       BuildSignalsArrayOnComponentRemoved<CharacterController2D>();
       BuildSignalsArrayOnComponentAdded<CharacterController3D>();
       BuildSignalsArrayOnComponentRemoved<CharacterController3D>();
+      BuildSignalsArrayOnComponentAdded<Quantum.FallDamageComponent>();
+      BuildSignalsArrayOnComponentRemoved<Quantum.FallDamageComponent>();
       BuildSignalsArrayOnComponentAdded<Quantum.HealthComponent>();
       BuildSignalsArrayOnComponentRemoved<Quantum.HealthComponent>();
       BuildSignalsArrayOnComponentAdded<MapEntityLink>();
@@ -1047,6 +1074,9 @@ namespace Quantum {
   public unsafe partial class PlatformControllerConfig : AssetObject {
   }
   public unsafe partial class ComponentPrototypeVisitor : Prototypes.ComponentPrototypeVisitorBase {
+    public virtual void Visit(Prototypes.FallDamageComponent_Prototype prototype) {
+      VisitFallback(prototype);
+    }
     public virtual void Visit(Prototypes.HealthComponent_Prototype prototype) {
       VisitFallback(prototype);
     }
@@ -1108,6 +1138,7 @@ namespace Quantum {
       Register(typeof(FPQuaternion), FPQuaternion.SIZE);
       Register(typeof(FPVector2), FPVector2.SIZE);
       Register(typeof(FPVector3), FPVector3.SIZE);
+      Register(typeof(Quantum.FallDamageComponent), Quantum.FallDamageComponent.SIZE);
       Register(typeof(FrameMetaData), FrameMetaData.SIZE);
       Register(typeof(Quantum.HealthComponent), Quantum.HealthComponent.SIZE);
       Register(typeof(HingeJoint), HingeJoint.SIZE);
@@ -1202,9 +1233,31 @@ namespace Quantum.Prototypes {
     }
   }
   [System.SerializableAttribute()]
+  [Prototype(typeof(FallDamageComponent))]
+  public sealed unsafe partial class FallDamageComponent_Prototype : ComponentPrototype<FallDamageComponent> {
+    public FP StartingHeight;
+    public QBoolean IsFalling;
+    public FP PreviousVerticalVelocity;
+    partial void MaterializeUser(Frame frame, ref FallDamageComponent result, in PrototypeMaterializationContext context);
+    public override Boolean AddToEntity(FrameBase f, EntityRef entity, in PrototypeMaterializationContext context) {
+      FallDamageComponent component = default;
+      Materialize((Frame)f, ref component, in context);
+      return f.Set(entity, component) == SetResult.ComponentAdded;
+    }
+    public void Materialize(Frame frame, ref FallDamageComponent result, in PrototypeMaterializationContext context) {
+      result.IsFalling = this.IsFalling;
+      result.PreviousVerticalVelocity = this.PreviousVerticalVelocity;
+      result.StartingHeight = this.StartingHeight;
+      MaterializeUser(frame, ref result, in context);
+    }
+    public override void Dispatch(ComponentPrototypeVisitorBase visitor) {
+      ((ComponentPrototypeVisitor)visitor).Visit(this);
+    }
+  }
+  [System.SerializableAttribute()]
   [Prototype(typeof(HealthComponent))]
   public sealed unsafe partial class HealthComponent_Prototype : ComponentPrototype<HealthComponent> {
-    public Int16 currentHealth;
+    public FP currentHealth;
     partial void MaterializeUser(Frame frame, ref HealthComponent result, in PrototypeMaterializationContext context);
     public override Boolean AddToEntity(FrameBase f, EntityRef entity, in PrototypeMaterializationContext context) {
       HealthComponent component = default;
@@ -1299,6 +1352,8 @@ namespace Quantum.Prototypes {
   }
   public unsafe partial class FlatEntityPrototypeContainer {
     [ArrayLength(0, 1)]
+    public List<Prototypes.FallDamageComponent_Prototype> FallDamageComponent;
+    [ArrayLength(0, 1)]
     public List<Prototypes.HealthComponent_Prototype> HealthComponent;
     [ArrayLength(0, 1)]
     public List<Prototypes.Platform_Prototype> Platform;
@@ -1307,12 +1362,16 @@ namespace Quantum.Prototypes {
     [ArrayLength(0, 1)]
     public List<Prototypes.PlayerPlatformController_Prototype> PlayerPlatformController;
     partial void CollectGen(List<ComponentPrototype> target) {
+      Collect(FallDamageComponent, target);
       Collect(HealthComponent, target);
       Collect(Platform, target);
       Collect(PlayerLink, target);
       Collect(PlayerPlatformController, target);
     }
     public unsafe partial class StoreVisitor {
+      public override void Visit(Prototypes.FallDamageComponent_Prototype prototype) {
+        Storage.Store(prototype, ref Storage.FallDamageComponent);
+      }
       public override void Visit(Prototypes.HealthComponent_Prototype prototype) {
         Storage.Store(prototype, ref Storage.HealthComponent);
       }
