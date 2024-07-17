@@ -44,12 +44,23 @@ namespace Quantum.Platformer
                 filter.FallDamageComponent->IsFalling= true;
             }
 
+            if (filter.HealthComponent->currentHealth == 0)
+            {
+                ResetPlayer(ref filter);
+            }
+
         }
 
         private void ApplyFallDamage(ref Filter filter, FP fallDistance)
         {
             var finalDamage = FPMath.Abs(fallDistance - 1);
             filter.HealthComponent->currentHealth = FPMath.Max(filter.HealthComponent->currentHealth - finalDamage, FP._0);
+        }
+
+        private void ResetPlayer(ref Filter filter)
+        {
+            filter.Transform3D->Position = new FPVector3(FP._0, 10, FP._0);
+            filter.HealthComponent->currentHealth = filter.HealthComponent->maxHealth;
         }
 
     }
